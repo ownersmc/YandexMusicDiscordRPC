@@ -1,0 +1,62 @@
+{
+  "discord_client_id": "1502442948527128617",
+  "poll_interval_seconds": 3,
+  "source_filters": [
+    "yandex",
+    "music",
+    "яндекс",
+    "музыка"
+  ],
+  "show_when_paused": true,
+  "activity_type": "listening",
+  "timestamp_mode": "both",
+  "seek_update_threshold_seconds": 3,
+  "loading_grace_seconds": 45,
+  "pause": {
+    "show_elapsed": true,
+    "update_interval_seconds": 5,
+    "state_template": "На паузе {pause_elapsed} • {progress}",
+    "small_text_template": "На паузе {pause_elapsed}"
+  },
+  "status_template": {
+    "details": "{title}",
+    "state": "{artist}"
+  },
+  "progress_bar": {
+    "enabled": false,
+    "length": 12,
+    "filled_char": "━",
+    "empty_char": "─",
+    "cursor_char": "●",
+    "show_time": true
+  },
+  "track_button": {
+    "enabled": true,
+    "label": "Открыть трек"
+  },
+  "cover_art": {
+    "enabled": true,
+    "search_yandex_public_cover": true,
+    "host": "127.0.0.1",
+    "port": 17654,
+    "public_base_url": "",
+    "fallback_large_image": ""
+  },
+  "fallback_text": {
+    "unknown_title": "Unknown track",
+    "unknown_artist": "Unknown artist"
+  },
+  "assets": {
+    "large_text": "Yandex Music",
+    "small_image_playing": "",
+    "small_image_paused": "",
+    "small_text_playing": "Playing",
+    "small_text_paused": "Paused"
+  },
+  "buttons": [
+    {
+      "label": "Yandex Music",
+      "url": "https://music.yandex.ru/"
+    }
+  ]
+}
