@@ -10,7 +10,7 @@
 [![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
 [![License](https://img.shields.io/github/license/ownersmc/YandexMusicDiscordRPC)](LICENSE)
 
-![Discord Rich Presence preview](assets/discord-preview.svg)
+![Discord Rich Presence preview](preview.png)
 
 </div>
 
