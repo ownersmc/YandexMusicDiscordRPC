@@ -1,132 +1,98 @@
-# Yandex Music Discord Presence
+<div align="center">
 
-Windows-клиент, который показывает текущий трек из Яндекс Музыки в Discord Rich Presence:
+# Yandex Music Discord RPC
+
+Показывает текущий трек из Яндекс Музыки в Discord Rich Presence на Windows.
+
+[![Latest release](https://img.shields.io/github/v/release/ownersmc/YandexMusicDiscordRPC?label=release)](https://github.com/ownersmc/YandexMusicDiscordRPC/releases)
+[![Downloads](https://img.shields.io/github/downloads/ownersmc/YandexMusicDiscordRPC/total?label=downloads)](https://github.com/ownersmc/YandexMusicDiscordRPC/releases)
+[![Windows](https://img.shields.io/badge/OS-Windows%2010%2F11-3572A5?logo=windows&logoColor=white)](https://github.com/ownersmc/YandexMusicDiscordRPC/releases)
+[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![License](https://img.shields.io/github/license/ownersmc/YandexMusicDiscordRPC)](LICENSE)
+
+![Discord Rich Presence preview](assets/discord-preview.svg)
+
+</div>
+
+## О проекте
+
+Yandex Music Discord RPC - небольшой Windows-клиент, который берет данные о текущем треке из системной медиасессии Windows и отправляет их в Discord Rich Presence.
+
+Проект не требует входа в аккаунт Яндекса и не использует токен Яндекс Музыки. Он работает локально: если Windows видит текущий трек в панели управления медиа, приложение сможет показать его в Discord.
+
+## Что показывает
 
 - название трека;
-- исполнитель;
-- обложка текущего трека;
-- живой таймер позиции трека через Discord timestamps;
-- кнопку со ссылкой на текущий трек.
+- исполнителя;
+- обложку трека;
+- таймер позиции трека в реальном времени;
+- состояние паузы и время паузы;
+- кнопку со ссылкой на текущий трек в Яндекс Музыке;
+- запасное удержание активности, если Яндекс Музыка долго грузит следующий трек.
 
-Клиент читает данные из системной медиасессии Windows. Поэтому он работает с приложением Яндекс Музыка и с браузером, если браузер отдает трек в Windows media controls.
+## Быстрый старт
 
-## Быстрый запуск
+Для обычного запуска Python не нужен.
 
-Для обычного пользователя Python не нужен.
-
-1. Скачайте `YandexMusicDiscordRPC-portable.zip` из GitHub Releases.
-2. Распакуйте архив.
+1. Скачайте `YandexMusicDiscordRPC-portable.zip` из [Releases](https://github.com/ownersmc/YandexMusicDiscordRPC/releases).
+2. Распакуйте архив в любую папку.
 3. Откройте Discord.
 4. Откройте Яндекс Музыку и включите трек.
 5. Запустите `YandexMusicDiscordRPC.exe`.
 
-Окно exe нужно оставить открытым, пока нужна активность в Discord. При первом запуске рядом с exe создастся `config.json`; обычно его менять не нужно.
+Окно программы нужно оставить открытым, пока нужна активность в Discord. При первом запуске рядом с exe появится `config.json`; обычно его можно не трогать.
 
-Discord должен быть открыт на этом же компьютере. В настройках Discord включите активность: `Settings -> Activity Privacy -> Share your detected activities with others`.
+## Требования
 
-## Запуск Из Исходников
+- Windows 10 или Windows 11;
+- установленный Discord Desktop;
+- включенная активность в Discord: `Settings -> Activity Privacy -> Share your detected activities with others`;
+- Яндекс Музыка в приложении или браузере, который отдает трек в Windows media controls.
 
-Если вы запускаете проект из исходников, используйте:
+## Как это работает
 
-```bat
-run.bat
-```
+Приложение читает текущую Windows media session через WinRT. Оттуда берутся название, исполнитель, альбом, длительность, позиция и статус воспроизведения.
 
-Этот способ сам создаст `.venv` и установит зависимости.
+Для красивого Rich Presence используются:
 
-## Обложки
+- `LISTENING` activity type;
+- `start` и `end` timestamps, чтобы Discord сам вел таймер;
+- поиск публичной HTTPS-обложки через Яндекс Музыку;
+- ссылка на найденный трек;
+- отслеживание перемотки, чтобы таймер не начинался с `0:00`, если RPC включили посреди трека.
 
-Клиент сначала ищет публичную HTTPS-обложку трека через Яндекс Музыку и отправляет ее в Discord как `large_image`.
+## Возможности
 
-Если публичная обложка не найдена, клиент может взять `thumbnail` из Windows media session, сохранить обложку в `cache/covers` и отдать ее по локальному HTTP:
+| Возможность | Статус |
+| --- | --- |
+| Название и исполнитель | Готово |
+| Обложка трека | Готово |
+| Таймер текущей позиции | Готово |
+| Перемотка трека | Готово |
+| Пауза с отдельным статусом | Готово |
+| Кнопка на текущий трек | Готово |
+| Portable exe | Готово |
+| GitHub Actions сборка | Готово |
 
-```text
-http://127.0.0.1:17654/cover/...
-```
+## Ограничения
 
-Discord Rich Presence принимает картинки как URL. Если локальная обложка не отображается в Discord или не видна другим людям, нужен публичный HTTPS URL, который прокидывает этот локальный сервер. Например, через Cloudflare Tunnel или ngrok, после чего нужно указать адрес в `config.json`:
+Discord Rich Presence не дает обычным клиентам рисовать полностью кастомную полоску прогресса как в самом плеере Яндекс Музыки. Поэтому приложение передает `start/end` timestamps, а Discord отображает доступный ему таймер и прогресс.
 
-```json
-{
-  "cover_art": {
-    "public_base_url": "https://your-tunnel.example.com"
-  }
-}
-```
+Если обложка не отображается у других людей, значит Discord не смог получить картинку по публичному HTTPS URL. В таком случае можно указать запасную картинку или публичный адрес для локального сервера обложек в `config.json`.
 
-Если обложка не пришла из Windows, можно поставить запасную картинку:
+## Настройка
 
-```json
-{
-  "cover_art": {
-    "fallback_large_image": "https://example.com/yandex-music.png"
-  }
-}
-```
+Пример настроек лежит в [config.example.json](config.example.json).
 
-## Таймер
-
-По умолчанию используется:
+Основные параметры:
 
 ```json
 {
+  "discord_client_id": "1502442948527128617",
   "activity_type": "listening",
   "timestamp_mode": "both",
   "seek_update_threshold_seconds": 3,
-  "loading_grace_seconds": 45
-}
-```
-
-Это повторяет подход `WinYandexMusicRPC`: Discord получает activity type `LISTENING`, а также `start` и `end` timestamps. Так Discord сам показывает доступный ему прогресс трека, включая секунды/минуты в реальном времени. Другие варианты:
-
-- `remaining` - показывать оставшееся время;
-- `both` - передавать `start` и `end`;
-- `none` - выключить таймер.
-
-Если вы вручную перемотали трек, клиент сравнит новый timestamp с уже отправленным. Если разница больше `seek_update_threshold_seconds`, presence обновится один раз и Discord переставит таймер.
-
-Если Яндекс Музыка долго грузит следующий трек и временно не отдает медиаданные, клиент держит прошлую активность еще `loading_grace_seconds` секунд, а не очищает Discord RPC сразу.
-
-## Пауза
-
-Когда трек стоит на паузе, клиент убирает бегущий `start/end` и показывает отдельный текст:
-
-```json
-{
-  "pause": {
-    "update_interval_seconds": 5,
-    "state_template": "На паузе {pause_elapsed} • {progress}",
-    "small_text_template": "На паузе {pause_elapsed}"
-  }
-}
-```
-
-Пример строки: `На паузе 0:12 • 1:10 / 2:06`.
-
-Discord не дает обычным Rich Presence-клиентам рисовать настоящую полоску плеера как в Яндекс Музыке. Если нужна текстовая имитация, ее можно включить в `state`:
-
-```json
-{
-  "status_template": {
-    "state": "{artist} • {progress_bar}"
-  },
-  "progress_bar": {
-    "enabled": true,
-    "length": 12,
-    "filled_char": "━",
-    "empty_char": "─",
-    "cursor_char": "●",
-    "show_time": true
-  }
-}
-```
-
-## Кнопка Трека
-
-Клиент ищет текущий трек в Яндекс Музыке и добавляет первую кнопку со ссылкой на него:
-
-```json
-{
+  "loading_grace_seconds": 45,
   "track_button": {
     "enabled": true,
     "label": "Открыть трек"
@@ -134,36 +100,69 @@ Discord не дает обычным Rich Presence-клиентам рисова
 }
 ```
 
-Вторая кнопка берется из `buttons`. Discord поддерживает максимум две кнопки.
+Полезные поля:
 
-## Конфиг
+- `source_filters` - по каким словам искать медиасессию Яндекс Музыки;
+- `show_when_paused` - показывать ли активность на паузе;
+- `timestamp_mode` - как передавать таймер в Discord;
+- `seek_update_threshold_seconds` - насколько сильно должна измениться позиция, чтобы считать это перемоткой;
+- `loading_grace_seconds` - сколько секунд держать прошлую активность при загрузке нового трека;
+- `progress_bar` - текстовая имитация полоски, если нужна строка в `state`;
+- `cover_art` - настройки обложек;
+- `track_button` - кнопка со ссылкой на текущий трек.
 
-- `source_filters` - строки, по которым клиент выбирает медиасессию Яндекс Музыки. Если слушаете через Chrome/браузер и клиент не видит трек, временно поставьте `[]`, чтобы брать текущую медиасессию Windows.
-- `show_when_paused` - показывать ли статус, когда музыка на паузе.
-- `status_template.details` и `status_template.state` - шаблоны текста. Доступны `{title}`, `{artist}`, `{album}`, `{source}`, `{position}`, `{duration}`, `{progress}`, `{progress_bar}`, `{status}`.
-- `activity_type` - тип активности Discord. Для музыки лучше `listening`, как в `WinYandexMusicRPC`.
-- `seek_update_threshold_seconds` - насколько сильно должна измениться позиция трека, чтобы клиент понял ручную перемотку.
-- `loading_grace_seconds` - сколько секунд держать последний RPC, если Яндекс Музыка временно не отдает трек при загрузке.
-- `pause` - шаблоны и интервал обновления статуса, когда музыка стоит на паузе.
-- `progress_bar` - текстовая имитация полоски времени.
-- `track_button` - кнопка текущего трека.
-- `cover_art.host` и `cover_art.port` - адрес локального сервера обложек.
-- `cover_art.search_yandex_public_cover` - искать публичную HTTPS-обложку через Яндекс Музыку.
-- `assets.small_image_playing` и `assets.small_image_paused` - необязательные маленькие картинки из Discord Rich Presence Art Assets.
-- `buttons` - кнопки в статусе. Discord поддерживает максимум две.
+## Запуск из исходников
 
-## Сборка Portable exe
+Если хотите запускать проект как Python-скрипт:
 
-Для локальной сборки запустите:
+```bat
+run.bat
+```
+
+Скрипт сам создаст `.venv`, установит зависимости и запустит клиент.
+
+Вручную:
+
+```bat
+py -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe yd_discord_presence.py
+```
+
+## Сборка exe
+
+Для локальной сборки portable-версии:
 
 ```bat
 build_release.bat
 ```
 
-Скрипт соберет:
+После сборки появятся:
 
 - `release/YandexMusicDiscordRPC.exe`;
 - `release/README_START.txt`;
 - `YandexMusicDiscordRPC-portable.zip`.
 
-В GitHub Actions уже есть workflow `.github/workflows/build-windows.yml`, который собирает такой же portable-архив вручную или при push тега `v*`.
+Также есть workflow [Build Windows exe](.github/workflows/build-windows.yml), который собирает portable-архив через GitHub Actions вручную или при push тега `v*`.
+
+## Если Discord ничего не показывает
+
+1. Проверьте, что Discord открыт до запуска RPC.
+2. Включите показ активности в настройках Discord.
+3. Запустите трек в Яндекс Музыке и подождите несколько секунд.
+4. Если используется браузер, попробуйте поставить `"source_filters": []` в `config.json`.
+5. Если Windows не показывает трек в медиа-оверлее, RPC тоже не сможет его прочитать.
+
+## Для разработчиков
+
+Проект написан на Python и использует:
+
+- [pypresence](https://github.com/qwertyquerty/pypresence) для Discord RPC;
+- [winrt](https://pypi.org/project/winrt-Windows.Media.Control/) для Windows media sessions;
+- [PyInstaller](https://pyinstaller.org/) для portable exe.
+
+Pull requests и Issues приветствуются.
+
+## Лицензия
+
+Проект распространяется под лицензией [MIT](LICENSE).
